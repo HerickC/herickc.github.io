@@ -1,11 +1,586 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Herick Carvalho</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Herick Martins de Carvalho — Backend Tech Lead</title>
+<meta name="description" content="Backend Tech Lead in logistics. Reliability engineering, route optimization (VRP), and platform tooling — from fiscal document pipelines to distributed systems." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+  :root{
+    --ink:        #0F141B;
+    --ink-2:      #12181F;
+    --panel:      #161D26;
+    --panel-2:    #1B232E;
+    --line:       #29333F;
+    --line-soft:  #202833;
+    --text:       #E7EBF0;
+    --text-dim:   #AEB8C6;
+    --muted:      #75808F;
+    --route:      #F0A93B;  /* the optimized path / highlight */
+    --route-dim:  #8a6526;
+    --node:       #57C9B0;  /* nodes & links */
+    --node-dim:   #2f6a60;
+
+    --display: 'Archivo', system-ui, sans-serif;
+    --body: 'IBM Plex Sans', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+    --maxw: 1080px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--text);
+    font-family:var(--body);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    /* faint dispatch-grid dotting */
+    background-image:radial-gradient(rgba(255,255,255,0.022) 1px, transparent 1px);
+    background-size:26px 26px;
+  }
+
+  a{ color:inherit; text-decoration:none; }
+  ::selection{ background:var(--route); color:#1a1206; }
+
+  .wrap{ width:100%; max-width:var(--maxw); margin:0 auto; padding:0 28px; }
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--node);
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px; height:7px; border-radius:50%;
+    background:var(--node);
+    box-shadow:0 0 0 4px rgba(87,201,176,0.14);
+  }
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(15,20,27,0.72);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .nav .wrap{ display:flex; align-items:center; justify-content:space-between; height:62px; }
+  .brand{
+    font-family:var(--mono); font-weight:600; font-size:14px;
+    letter-spacing:0.04em; display:flex; align-items:center; gap:10px;
+  }
+  .brand .dot{ color:var(--route); }
+  .navlinks{ display:flex; gap:26px; }
+  .navlinks a{
+    font-family:var(--mono); font-size:12.5px; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--muted); transition:color .18s ease;
+  }
+  .navlinks a:hover, .navlinks a:focus-visible{ color:var(--text); }
+  @media (max-width:680px){ .navlinks{ display:none; } }
+
+  /* ---------- HERO ---------- */
+  .hero{ position:relative; overflow:hidden; padding:84px 0 70px; }
+  .hero-grid{
+    display:grid; grid-template-columns:1.15fr 0.85fr; gap:40px; align-items:center;
+  }
+  .hero h1{
+    font-family:var(--display); font-weight:800;
+    font-size:clamp(2.6rem, 6vw, 4.3rem);
+    line-height:1.02; letter-spacing:-0.02em; margin:18px 0 0;
+  }
+  .hero .role{
+    margin-top:16px; font-family:var(--mono); font-size:14px;
+    color:var(--route); letter-spacing:0.04em;
+  }
+  .hero .thesis{
+    margin-top:22px; font-size:18px; color:var(--text-dim); max-width:34em;
+  }
+  .hero .thesis b{ color:var(--text); font-weight:600; }
+
+  .cta-row{ margin-top:30px; display:flex; gap:14px; flex-wrap:wrap; }
+  .btn{
+    font-family:var(--mono); font-size:13px; letter-spacing:0.04em;
+    padding:12px 20px; border-radius:8px; border:1px solid var(--line);
+    display:inline-flex; align-items:center; gap:9px;
+    transition:transform .16s ease, border-color .16s ease, background .16s ease;
+  }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn.primary{ background:var(--route); color:#1a1206; border-color:var(--route); font-weight:600; }
+  .btn.primary:hover{ background:#ffbb52; }
+  .btn.ghost{ color:var(--text); }
+  .btn.ghost:hover{ border-color:var(--node); color:#fff; }
+
+  /* route artwork */
+  .hero-art{ position:relative; min-height:300px; }
+  .route-svg{ width:100%; height:auto; display:block; }
+  .route-path{
+    fill:none; stroke:var(--route); stroke-width:2.4;
+    stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:1400; stroke-dashoffset:1400;
+    animation:draw 2.4s cubic-bezier(.65,.05,.36,1) forwards .2s;
+    filter:drop-shadow(0 0 6px rgba(240,169,59,.35));
+  }
+  .route-ghost{ fill:none; stroke:var(--line); stroke-width:1.3; stroke-dasharray:5 7; }
+  .node{ fill:var(--ink); stroke:var(--node); stroke-width:2.2; opacity:0; animation:pop .5s ease forwards; }
+  .node-core{ fill:var(--node); opacity:0; animation:pop .5s ease forwards; }
+  .node-label{
+    font-family:var(--mono); font-size:10.5px; fill:var(--muted);
+    letter-spacing:0.06em; opacity:0; animation:fade .6s ease forwards;
+  }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+  @keyframes pop{ from{ opacity:0; transform:scale(.4); } to{ opacity:1; transform:scale(1); } }
+  @keyframes fade{ to{ opacity:1; } }
+
+  /* stat readouts */
+  .readouts{
+    margin-top:46px; display:grid; grid-template-columns:repeat(4,1fr);
+    border:1px solid var(--line-soft); border-radius:12px; overflow:hidden;
+    background:linear-gradient(180deg,var(--ink-2),var(--ink));
+  }
+  .readout{ padding:20px 22px; border-right:1px solid var(--line-soft); }
+  .readout:last-child{ border-right:none; }
+  .readout .v{
+    font-family:var(--display); font-weight:700; font-size:1.7rem;
+    color:var(--route); line-height:1; letter-spacing:-0.01em;
+  }
+  .readout .k{
+    margin-top:9px; font-family:var(--mono); font-size:11px;
+    text-transform:uppercase; letter-spacing:0.1em; color:var(--muted);
+  }
+  @media (max-width:780px){
+    .hero-grid{ grid-template-columns:1fr; }
+    .hero-art{ order:-1; min-height:auto; max-width:380px; }
+    .readouts{ grid-template-columns:repeat(2,1fr); }
+    .readout:nth-child(2){ border-right:none; }
+    .readout:nth-child(1),.readout:nth-child(2){ border-bottom:1px solid var(--line-soft); }
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section{ padding:72px 0; border-top:1px solid var(--line-soft); }
+  .sec-head{ margin-bottom:40px; }
+  .sec-head h2{
+    font-family:var(--display); font-weight:700;
+    font-size:clamp(1.6rem,3.4vw,2.3rem); letter-spacing:-0.015em;
+    margin:14px 0 0;
+  }
+  .sec-head p{ margin:12px 0 0; color:var(--text-dim); max-width:52em; }
+
+  /* profile / what i do */
+  .pillars{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  .pillar{
+    background:var(--panel); border:1px solid var(--line-soft);
+    border-radius:14px; padding:26px 24px; transition:border-color .2s ease, transform .2s ease;
+  }
+  .pillar:hover{ border-color:var(--node-dim); transform:translateY(-3px); }
+  .pillar .ix{ font-family:var(--mono); font-size:12px; color:var(--node); letter-spacing:0.1em; }
+  .pillar h3{ font-family:var(--display); font-weight:700; font-size:1.18rem; margin:14px 0 8px; }
+  .pillar p{ margin:0; color:var(--text-dim); font-size:14.5px; }
+  @media (max-width:780px){ .pillars{ grid-template-columns:1fr; } }
+
+  /* ---------- EXPERIENCE = ROUTE ---------- */
+  .route-line{ position:relative; padding-left:34px; }
+  .route-line::before{
+    content:""; position:absolute; left:9px; top:6px; bottom:6px; width:2px;
+    background:linear-gradient(180deg,var(--route),var(--route-dim) 55%,var(--line));
+  }
+  .stop{ position:relative; padding:0 0 38px; }
+  .stop:last-child{ padding-bottom:0; }
+  .stop::before{
+    content:""; position:absolute; left:-30px; top:7px;
+    width:14px; height:14px; border-radius:50%;
+    background:var(--ink); border:2.5px solid var(--node);
+    box-shadow:0 0 0 4px rgba(87,201,176,0.1);
+  }
+  .stop.current::before{ border-color:var(--route); box-shadow:0 0 0 4px rgba(240,169,59,0.16); }
+  .stop .meta{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.04em;
+    color:var(--muted); display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center;
+  }
+  .stop .meta .now{ color:var(--route); }
+  .stop h3{ font-family:var(--display); font-weight:700; font-size:1.25rem; margin:10px 0 2px; }
+  .stop .co{ color:var(--node); font-weight:500; }
+  .stop p{ margin:10px 0 14px; color:var(--text-dim); max-width:60em; }
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:0.02em;
+    padding:5px 11px; border-radius:6px;
+    background:var(--panel); border:1px solid var(--line-soft); color:var(--text-dim);
+  }
+
+  /* ---------- CAPABILITIES ---------- */
+  .caps{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
+  .cap{
+    background:var(--panel); border:1px solid var(--line-soft);
+    border-radius:14px; padding:24px;
+  }
+  .cap h3{
+    font-family:var(--mono); font-size:12.5px; text-transform:uppercase;
+    letter-spacing:0.12em; color:var(--route); margin:0 0 16px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .cap h3 .bar{ flex:1; height:1px; background:var(--line); }
+  .cap .tags{ display:flex; flex-wrap:wrap; gap:8px; }
+  .cap .tags span{
+    font-family:var(--body); font-size:14px;
+    padding:6px 12px; border-radius:7px;
+    background:var(--panel-2); border:1px solid var(--line-soft); color:var(--text-dim);
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .cap .tags span:hover{ color:var(--text); border-color:var(--node-dim); }
+  @media (max-width:780px){ .caps{ grid-template-columns:1fr; } }
+
+  /* ---------- EDUCATION ---------- */
+  .edu{ display:grid; gap:0; border:1px solid var(--line-soft); border-radius:14px; overflow:hidden; }
+  .edu-row{
+    display:grid; grid-template-columns:1fr auto; gap:16px; align-items:baseline;
+    padding:20px 24px; border-bottom:1px solid var(--line-soft); background:var(--panel);
+  }
+  .edu-row:last-child{ border-bottom:none; }
+  .edu-row .d{ font-family:var(--display); font-weight:600; font-size:1.05rem; }
+  .edu-row .s{ color:var(--node); font-size:14px; }
+  .edu-row .when{ font-family:var(--mono); font-size:12px; color:var(--muted); white-space:nowrap; }
+  @media (max-width:560px){ .edu-row{ grid-template-columns:1fr; } }
+
+  /* languages strip */
+  .langs{ margin-top:22px; display:flex; gap:26px; flex-wrap:wrap; font-family:var(--mono); font-size:13px; color:var(--text-dim); }
+  .langs b{ color:var(--text); font-weight:600; }
+
+  /* ---------- CONTACT ---------- */
+  .contact{ text-align:center; }
+  .contact h2{
+    font-family:var(--display); font-weight:800;
+    font-size:clamp(1.9rem,4.5vw,3rem); letter-spacing:-0.02em; margin:16px 0 0;
+  }
+  .contact p{ margin:14px auto 0; color:var(--text-dim); max-width:34em; }
+  .contact .cta-row{ justify-content:center; }
+
+  footer{
+    border-top:1px solid var(--line-soft); padding:30px 0;
+    font-family:var(--mono); font-size:12px; color:var(--muted);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+
+  /* reveal on scroll */
+  .reveal{ opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease; }
+  .reveal.in{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ opacity:1; transform:none; transition:none; }
+    .route-path{ animation:none; stroke-dashoffset:0; }
+    .node,.node-core,.node-label{ animation:none; opacity:1; }
+  }
+
+  :focus-visible{ outline:2px solid var(--node); outline-offset:3px; border-radius:4px; }
+</style>
 </head>
 <body>
-    Welcome to my Resume
+
+<!-- ===== NAV ===== -->
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top">HMC <span class="dot">//</span> backend.lead</a>
+    <div class="navlinks">
+      <a href="#profile">Profile</a>
+      <a href="#experience">Route</a>
+      <a href="#capabilities">Capabilities</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow">Backend Tech Lead · Logistics</span>
+        <h1>Herick Martins<br>de Carvalho</h1>
+        <div class="role">backend &amp; route-optimization · reliability engineering · MG / Brazil</div>
+        <p class="thesis">
+          I design and run the backend that keeps freight moving at scale — from a
+          fiscal-document pipeline holding a <b>&gt;99% generation SLA</b> to the
+          <b>route-optimization core</b> of a logistics platform. Mechatronics and
+          firmware roots; comfortable from the silicon to the distributed system.
+        </p>
+        <div class="cta-row">
+          <a class="btn primary" href="#contact">Get in touch →</a>
+          <a class="btn ghost" href="#experience">See the route</a>
+        </div>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        <svg class="route-svg" viewBox="0 0 360 320" xmlns="http://www.w3.org/2000/svg">
+          <!-- ghost guide -->
+          <path class="route-ghost" d="M30 290 C 70 250, 40 200, 110 185 S 250 210, 230 130 S 150 90, 215 60 S 320 70, 330 30" />
+          <!-- drawn optimal path -->
+          <path class="route-path" d="M30 290 C 70 250, 40 200, 110 185 S 250 210, 230 130 S 150 90, 215 60 S 320 70, 330 30" />
+          <!-- nodes -->
+          <g>
+            <circle class="node-core" cx="30"  cy="290" r="3.5" style="animation-delay:.4s"/>
+            <circle class="node"      cx="30"  cy="290" r="7"   style="animation-delay:.4s"/>
+            <text class="node-label"  x="42"  y="294" style="animation-delay:.6s">origin · hardware</text>
+
+            <circle class="node-core" cx="110" cy="185" r="3.5" style="animation-delay:.9s"/>
+            <circle class="node"      cx="110" cy="185" r="7"   style="animation-delay:.9s"/>
+            <text class="node-label"  x="122" y="189" style="animation-delay:1.1s">backend</text>
+
+            <circle class="node-core" cx="230" cy="130" r="3.5" style="animation-delay:1.4s"/>
+            <circle class="node"      cx="230" cy="130" r="7"   style="animation-delay:1.4s"/>
+            <text class="node-label"  x="160" y="120" style="animation-delay:1.6s">reliability</text>
+
+            <circle class="node-core" cx="215" cy="60"  r="3.5" style="animation-delay:1.9s"/>
+            <circle class="node"      cx="215" cy="60"  r="7"   style="animation-delay:1.9s"/>
+            <text class="node-label"  x="120" y="56"  style="animation-delay:2.1s">route optimization</text>
+
+            <circle class="node-core" cx="330" cy="30"  r="3.5" style="animation-delay:2.3s"/>
+            <circle class="node"      cx="330" cy="30"  r="7"   style="animation-delay:2.3s"/>
+            <text class="node-label"  x="232" y="22"  style="animation-delay:2.5s" fill="#F0A93B">→ now</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="readouts">
+      <div class="readout"><div class="v">2022→</div><div class="k">Backend Tech Lead</div></div>
+      <div class="readout"><div class="v">&gt;99%</div><div class="k">Fiscal doc SLA</div></div>
+      <div class="readout"><div class="v">VRP</div><div class="k">Route-opt core owner</div></div>
+      <div class="readout"><div class="v">HW→SW</div><div class="k">Mechatronics to systems</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== PROFILE ===== -->
+<section id="profile">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Profile</span>
+      <h2>What I'm responsible for</h2>
+      <p>
+        Tech Lead at Uello, a logistics startup, where I own the backend and QA tracks.
+        I pair strategic leadership with hands-on engineering, and I optimize for
+        systems that stay up, stay observable, and stay easy to ship to.
+      </p>
+    </div>
+    <div class="pillars">
+      <div class="pillar reveal">
+        <div class="ix">01</div>
+        <h3>Reliability &amp; SLOs</h3>
+        <p>Led a full refactor of the financial and fiscal flow to a document-generation SLA above 99%, with observability and monitoring built in via NewRelic.</p>
+      </div>
+      <div class="pillar reveal">
+        <div class="ix">02</div>
+        <h3>Route optimization</h3>
+        <p>Own the route-optimization system at the core of the platform — infrastructure, service stability, and the developer experience around it.</p>
+      </div>
+      <div class="pillar reveal">
+        <div class="ix">03</div>
+        <h3>Platform &amp; DevEx</h3>
+        <p>Build internal tooling that streamlines deployment and observability, and fold quality into CI/CD so teams move fast without breaking production.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EXPERIENCE / ROUTE ===== -->
+<section id="experience">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Experience</span>
+      <h2>The route so far</h2>
+      <p>A path from firmware and embedded electronics to leading backend systems in logistics — each stop a waypoint.</p>
+    </div>
+
+    <div class="route-line">
+      <div class="stop current reveal">
+        <div class="meta"><span class="now">● Current</span><span>Uello S.A. · São Paulo, SP</span><span>02/2024 — Present</span></div>
+        <h3>QA Tech Leader <span class="co">@ Uello</span></h3>
+        <p>Lead the QA team with a focus on automation and process improvement. Built tooling to accelerate regression testing and integrated quality directly into CI/CD pipelines.</p>
+        <div class="chips">
+          <span class="chip">Cypress</span><span class="chip">Postman</span><span class="chip">CI/CD</span>
+          <span class="chip">Test Strategy</span><span class="chip">Automation Frameworks</span><span class="chip">Agile Testing</span>
+        </div>
+      </div>
+
+      <div class="stop current reveal">
+        <div class="meta"><span class="now">● Current</span><span>Uello S.A. · São Paulo, SP</span><span>05/2022 — Present</span></div>
+        <h3>Backend Tech Leader <span class="co">@ Uello</span></h3>
+        <p>Technical leadership of the backend team — process optimization and system architecture. Led the complete refactor of the company's financial and fiscal flow to a document-generation SLA above 99%, and took ownership of the route-optimization system at the core of the product: infrastructure, service stability, and developer experience.</p>
+        <div class="chips">
+          <span class="chip">PHP · Laravel · Symfony</span><span class="chip">Python</span><span class="chip">Node.js</span>
+          <span class="chip">Kubernetes</span><span class="chip">Pub/Sub</span><span class="chip">Redis · MySQL</span>
+          <span class="chip">GCloud</span><span class="chip">NewRelic</span><span class="chip">Microservices</span>
+          <span class="chip">Clean Architecture</span><span class="chip">SLA Management</span>
+        </div>
+      </div>
+
+      <div class="stop reveal">
+        <div class="meta"><span>Uello S.A. · São Paulo, SP</span><span>12/2020 — 05/2022</span></div>
+        <h3>Mid-Level Backend Developer <span class="co">@ Uello</span></h3>
+        <p>Worked on core backend services across finance, fiscal, and logistics flows. Built scalable APIs and microservices, and helped roll out cloud-native practices and container orchestration.</p>
+        <div class="chips">
+          <span class="chip">PHP · Laravel</span><span class="chip">REST API Design</span><span class="chip">Microservices</span>
+          <span class="chip">Docker</span><span class="chip">Kubernetes</span><span class="chip">GCloud</span><span class="chip">Unit Testing</span>
+        </div>
+      </div>
+
+      <div class="stop reveal">
+        <div class="meta"><span>JetUp Tecnologia · Belo Horizonte, MG</span><span>03/2016 — 05/2021</span></div>
+        <h3>Engineering Coordinator · Co-founder <span class="co">@ JetUp</span></h3>
+        <p>Co-founded a startup doing hyper-targeted marketing over hotspot networks. Led engineering end to end — hardware to frontend — owning DevOps, system design, and delivery.</p>
+        <div class="chips">
+          <span class="chip">PHP · Laravel · Vue.js</span><span class="chip">Networking · Mikrotik</span><span class="chip">DevOps</span>
+          <span class="chip">Kubernetes</span><span class="chip">Azure</span><span class="chip">Ansible</span><span class="chip">Linux Admin</span>
+        </div>
+      </div>
+
+      <div class="stop reveal">
+        <div class="meta"><span>Vibracon Engenharia · Belo Horizonte, MG</span><span>08/2015 — 08/2017</span></div>
+        <h3>Project Analyst <span class="co">@ Vibracon</span></h3>
+        <p>Developed industrial vehicle safety systems and vibration sensors, writing firmware and designing custom electronics for embedded systems.</p>
+        <div class="chips">
+          <span class="chip">C / C++</span><span class="chip">Firmware</span><span class="chip">PCB Design · Altium</span>
+          <span class="chip">SolidWorks</span><span class="chip">Embedded Systems</span><span class="chip">Sensor Calibration</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CAPABILITIES ===== -->
+<section id="capabilities">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Capabilities</span>
+      <h2>The toolkit</h2>
+      <p>Grouped by what I reach for, not by buzzword count.</p>
+    </div>
+
+    <div class="caps">
+      <div class="cap reveal">
+        <h3>Backend &amp; Architecture <span class="bar"></span></h3>
+        <div class="tags">
+          <span>PHP (Laravel, Symfony)</span><span>Python</span><span>Node.js (Express)</span>
+          <span>REST API design</span><span>Microservices</span><span>Clean Architecture</span>
+          <span>OOD / OOP</span><span>TDD / BDD</span><span>Async &amp; parallel processing</span>
+          <span>Algorithm design &amp; optimization</span>
+        </div>
+      </div>
+
+      <div class="cap reveal">
+        <h3>Infra, DevOps &amp; Observability <span class="bar"></span></h3>
+        <div class="tags">
+          <span>Kubernetes</span><span>Docker / Compose</span><span>CI/CD</span><span>GCP</span>
+          <span>Azure</span><span>AWS</span><span>Terraform</span><span>Ansible</span>
+          <span>NewRelic</span><span>Pub/Sub</span><span>Linux administration</span>
+        </div>
+      </div>
+
+      <div class="cap reveal">
+        <h3>Data &amp; Storage <span class="bar"></span></h3>
+        <div class="tags">
+          <span>MySQL</span><span>PostgreSQL</span><span>Eloquent</span><span>Doctrine</span>
+          <span>Redis</span><span>Pub/Sub messaging</span>
+        </div>
+      </div>
+
+      <div class="cap reveal">
+        <h3>Domain &amp; AI <span class="bar"></span></h3>
+        <div class="tags">
+          <span>Route optimization (VRP)</span><span>Logistics systems</span>
+          <span>Fiscal &amp; financial systems</span><span>Artificial Intelligence</span>
+        </div>
+      </div>
+
+      <div class="cap reveal">
+        <h3>Frontend <span class="bar"></span></h3>
+        <div class="tags">
+          <span>Vue.js</span><span>React</span><span>JavaScript (ES6+)</span>
+        </div>
+      </div>
+
+      <div class="cap reveal">
+        <h3>Hardware roots <span class="bar"></span></h3>
+        <div class="tags">
+          <span>C / C++</span><span>Firmware</span><span>Embedded systems</span>
+          <span>PCB design (Altium)</span><span>SolidWorks · Fusion 360</span><span>Sensor calibration</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EDUCATION ===== -->
+<section id="education">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Education</span>
+      <h2>Background</h2>
+    </div>
+    <div class="edu reveal">
+      <div class="edu-row">
+        <div><div class="d">Artificial Intelligence</div><div class="s">PUC Minas · Postgraduate</div></div>
+        <div class="when">2020 — 2021</div>
+      </div>
+      <div class="edu-row">
+        <div><div class="d">Mechatronics Engineering</div><div class="s">PUC Minas · Bachelor's degree</div></div>
+        <div class="when">2011 — 2016</div>
+      </div>
+      <div class="edu-row">
+        <div><div class="d">Electronic Technician</div><div class="s">SENAI · Technical</div></div>
+        <div class="when">2009 — 2010</div>
+      </div>
+    </div>
+    <div class="langs reveal">
+      <span>Languages:</span>
+      <span><b>Portuguese</b> — Native</span>
+      <span><b>English</b> — Professional working</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section id="contact" class="contact">
+  <div class="wrap">
+    <span class="eyebrow" style="justify-content:center; display:flex;">Contact</span>
+    <h2>Let's talk backend.</h2>
+    <p>Open to senior backend and tech-lead roles. Reach out and I'll get back to you.</p>
+    <div class="cta-row">
+      <a class="btn primary" href="mailto:herickcarvalho@outlook.com">Email me</a>
+      <a class="btn ghost" href="https://github.com/herickc" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn ghost" href="https://www.linkedin.com/in/herickmc" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; width:100%; max-width:var(--maxw);">
+    <span>© <span id="yr"></span> Herick Martins de Carvalho</span>
+    <span>built for the route ahead</span>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  // scroll reveal
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold:0.12, rootMargin:'0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
 </body>
 </html>
